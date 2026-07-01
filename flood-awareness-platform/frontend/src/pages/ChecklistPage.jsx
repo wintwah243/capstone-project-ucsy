@@ -30,7 +30,6 @@ function ChecklistPage() {
         {/* Header */}
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-slate-800">ရေမကြီးခင် ကြိုတင်ပြင်ဆင်ထားရမည့် အခြေခံစာရင်းများ</h1>
-          {/* <p className="text-slate-600">ရေမကြီးခင် ကြိုတင်ပြင်ဆင်ထားရမည့် အခြေခံစာရင်းများ</p> */}
         </header>
 
         {/* 🔒 Locked/Customized Banner (Call-To-Action) */}
