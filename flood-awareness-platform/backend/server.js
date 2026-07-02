@@ -18,6 +18,9 @@ app.use('/api/articles', articleRoutes);
 const checklistRoutes = require('./routes/checklistRoutes');
 app.use('/api/checklists', checklistRoutes);
 
+const riskRoutes = require('./routes/riskRoutes');
+app.use('/api/risk', riskRoutes);
+
 app.get('/', (req, res) => {
   res.send('Flood Awareness Platform Backend is working');
 });

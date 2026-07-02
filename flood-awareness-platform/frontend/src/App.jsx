@@ -3,8 +3,8 @@ import Navbar from './components/Navbar';
 import KnowledgeHub from './pages/KnowledgeHub';
 import ChecklistPage from './pages/ChecklistPage';
 import HomePage from './pages/Homepage';
+import RiskAssessment from './pages/RiskAssessment';
 
-const RiskAssessment = () => <div className="p-12 text-center text-xl font-semibold">Interactive Flood Risk Checker (Coming Soon)</div>;
 const AIAssistant = () => <div className="p-12 text-center text-xl font-semibold">AI-Powered Flood Assistant Chatbot (Coming Soon)</div>;
 
 function App() {
