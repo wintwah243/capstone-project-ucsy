@@ -216,9 +216,11 @@ const Homepage = () => {
                     <option>အောင်မြေသာစံမြို့နယ်</option>
                     <option>မဟာအောင်မြေမြို့နယ်</option>
                   </select>
-                  <button className="w-full bg-white text-blue-700 font-semibold px-4 py-2 rounded-lg hover:bg-blue-50 transition">
-                    စစ်ဆေးမည်
-                  </button>
+                  <Link to="/risk-assessment">
+                    <button className="w-full bg-white text-blue-700 font-semibold px-4 py-2 rounded-lg hover:bg-blue-50 transition">
+                      စစ်ဆေးမည်
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>
