@@ -26,7 +26,7 @@ const townshipMapping = {
   'မင်္ဂလာဒုံ': 'Mingaladon',
   'တာမွေ': 'Tamwe',
   'ရန်ကင်း': 'Yankin',
-  'ဘော်ဒါ': 'Botahtaung',
+  'ဗိုလ်တစ်ထောင်': 'Botahtaung',
   'ဒဂုံ': 'Dagon',
   'သင်္ဃန်းကျွန်း': 'Thingangyun',
   'သာကေတ': 'Thaketa',

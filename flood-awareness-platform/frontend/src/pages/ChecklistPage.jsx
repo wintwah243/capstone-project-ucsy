@@ -32,7 +32,6 @@ function ChecklistPage() {
           <h1 className="text-3xl font-bold text-slate-800">ရေမကြီးခင် ကြိုတင်ပြင်ဆင်ထားရမည့် အခြေခံစာရင်းများ</h1>
         </header>
 
-        {/* 🔒 Locked/Customized Banner (Call-To-Action) */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h3 className="font-bold text-blue-900 text-lg flex items-center gap-2">ကိုယ်ပိုင် Checklist ဖန်တီးချင်ပါသလား?</h3>

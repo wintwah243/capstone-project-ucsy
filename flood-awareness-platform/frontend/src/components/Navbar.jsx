@@ -31,7 +31,7 @@ function Navbar() {
 
         {/* Guest Login/Register Button Placeholder */}
         <button className="bg-blue-600 text-white text-xs px-3 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shrink-0">
-          Login / Register
+          အကောင့်ဖွင့်မည်
         </button>
       </div>
     </nav>
