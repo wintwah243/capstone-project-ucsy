@@ -21,6 +21,9 @@ app.use('/api/checklists', checklistRoutes);
 const riskRoutes = require('./routes/riskRoutes');
 app.use('/api/risk', riskRoutes);
 
+const chatRoutes = require('./routes/chatRoutes');
+app.use('/api/chat', chatRoutes);
+
 app.get('/', (req, res) => {
   res.send('Flood Awareness Platform Backend is working');
 });

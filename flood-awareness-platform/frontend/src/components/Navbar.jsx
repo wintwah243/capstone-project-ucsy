@@ -29,7 +29,7 @@ function Navbar() {
           <Link to="/ai-assistant" className={isActive('/ai-assistant')}>AI လက်ထောက်</Link>
         </div>
 
-        {/* Guest Login/Register Button Placeholder */}
+        {/* Login/Register */}
         <button className="bg-blue-600 text-white text-xs px-3 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shrink-0">
           အကောင့်ဖွင့်မည်
         </button>

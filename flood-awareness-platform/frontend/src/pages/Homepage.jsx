@@ -276,9 +276,11 @@ const Homepage = () => {
                 placeholder="ရေကြီးမှုဆိုင်ရာ မေးခွန်းတစ်ခုမေးပါ..." 
                 className="flex-1 bg-transparent text-white placeholder-blue-200 px-4 py-2 outline-none"
               />
-              <button className="bg-white text-blue-700 px-6 py-2 rounded-lg font-semibold hover:bg-blue-50 transition">
-                မေးမည်
-              </button>
+              <Link to="/ai-assistant">
+                <button className="bg-white text-blue-700 px-6 py-2 rounded-lg font-semibold hover:bg-blue-50 transition">
+                  မေးမည်
+                </button>
+              </Link>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               <button className="bg-white/20 px-3 py-1 rounded-full text-sm hover:bg-white/30 transition">

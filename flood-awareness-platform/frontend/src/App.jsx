@@ -4,8 +4,7 @@ import KnowledgeHub from './pages/KnowledgeHub';
 import ChecklistPage from './pages/ChecklistPage';
 import HomePage from './pages/Homepage';
 import RiskAssessment from './pages/RiskAssessment';
-
-const AIAssistant = () => <div className="p-12 text-center text-xl font-semibold">AI-Powered Flood Assistant Chatbot (Coming Soon)</div>;
+import FloodAIAssistant from './pages/FloodAIAssistant';
 
 function App() {
   return (
@@ -17,7 +16,7 @@ function App() {
         <Route path="/knowledge-hub" element={<KnowledgeHub />} />
         <Route path="/checklist" element={<ChecklistPage />} />
         <Route path="/risk-assessment" element={<RiskAssessment />} />
-        <Route path="/ai-assistant" element={<AIAssistant />} />
+        <Route path="/ai-assistant" element={<FloodAIAssistant />} />
       </Routes>
     </Router>
   );
