@@ -1,9 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const { Groq } = require('groq-sdk');
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 // Mapping Dictionary
 const townshipMapping = {
@@ -33,6 +30,48 @@ const townshipMapping = {
   'လှိုင်သာယာ': 'Hlaingthaya'
 };
 
+// Helper function to evaluate risk based on weather data conditions
+function assessFloodRisk(weather) {
+  const description = weather.weather[0].description.toLowerCase();
+  const mainCondition = weather.weather[0].main.toLowerCase();
+  const humidity = weather.main.humidity;
+
+  // Severe risk factors: Heavy/thunderstorm rain, or high rain volume with intense humidity
+  if (
+    description.includes('heavy') || 
+    description.includes('thunderstorm') || 
+    description.includes('extreme') ||
+    (mainCondition === 'rain' && humidity > 90)
+  ) {
+    return {
+      riskLevel: "High (ပြင်းထန် - မိုးသည်းထန်စွာရွာသွန်းပြီး စိုထိုင်းဆ အလွန်မြင့်မားနေပါသည်)",
+      recommendation: "ရေကြီးရေလျှံမှု ဖြစ်ပေါ်နိုင်သဖြင့် ရေဘေးလွတ်ရာသို့ ကြိုတင်ပြင်ဆင်ရွှေ့ပြောင်းပါ။ အရေးပေါ်သုံးပစ္စည်းများ စုဆောင်းထားပါ။",
+      colorCode: "red"
+    };
+  }
+
+  // Moderate risk factors: Light to moderate rain, or high humidity conditions
+  if (
+    mainCondition === 'rain' || 
+    description.includes('drizzle') || 
+    description.includes('shower') ||
+    humidity > 80
+  ) {
+    return {
+      riskLevel: "Moderate (အသင့်အတင့် - မိုးရွာသွန်းမှု သို့မဟုတ် စိုထိုင်းဆ များပြားနေပါသည်)",
+      recommendation: "မိုးလေဝသသတင်းများကို ဂရုတစိုက်စောင့်ကြည့်ပါ။ ရေနုတ်မြောင်းများ ပိတ်ဆို့မှုမရှိအောင် သန့်ရှင်းရေးလုပ်ထားပါ။",
+      colorCode: "yellow"
+    };
+  }
+
+  // Baseline low risk safety profile
+  return {
+    riskLevel: "Low (နိမ့်ပါး - လက်ရှိ ရာသီဥတုအခြေအနေ ပုံမှန်ရှိနေပါသည်)",
+    recommendation: "ထူးခြားသော ဘေးအန္တရာယ်မရှိပါ။ ပုံမှန်အတိုင်း သတိပြု သွားလာနိုင်ပါသည်။",
+    colorCode: "green"
+  };
+}
+
 router.post('/check', async (req, res) => {
   let { township } = req.body;
   if (!township) return res.status(400).json({ message: 'မြို့နယ်အမည် လိုအပ်ပါသည်။' });
@@ -46,45 +85,22 @@ router.post('/check', async (req, res) => {
     const weatherRes = await axios.get(weatherUrl);
     const weatherData = weatherRes.data;
 
-    const aiPrompt = `
-      မင်းက ရေဘေးအန္တရာယ်ဆိုင်ရာ ကျွမ်းကျင်သူ AI တစ်ဦး ဖြစ်ပါတယ်။
-      အောက်ပါ လက်ရှိ မိုးလေဝသ အချက်အလက်များအပေါ် မူတည်ပြီး မြန်မာနိုင်ငံ၊ ${township} မြို့နယ်အတွက် Flood Risk Assessment ကို မြန်မာလိုပဲ သုံးသပ်တွက်ချက်ပေးပါ။
-      
-      [အချက်အလက်များ]
-      - မြို့နယ်: ${township}
-      - လက်ရှိရာသီဥတု: ${weatherData.weather[0].description}
-      - အပူချိန်: ${weatherData.main.temp}°C
-      - စိုထိုင်းဆ (Humidity): ${weatherData.main.humidity}%
-      
-      ကျေးဇူးပြု၍ တုံ့ပြန်မှုကို အောက်ပါ JSON format အတိုင်းပဲ ကွက်တိ ပြသပေးပါ။ အရှေ့အနောက်မှာ တခြား မလိုအပ်တဲ့ စာသားတွေ (ဥပမာ- "Here is the JSON:") လုံးဝ လုံးဝ မပါစေရပါ။ JSON structure သက်သက်သာ ဖြစ်ရပါမည်။
-      {
-        "riskLevel": "Low သို့မဟုတ် Moderate သို့မဟုတ် High (မြန်မာလိုပါ ရှင်းပြချက် တိုတိုတုတ်တုတ် ထည့်ရန်)",
-        "recommendation": "ပြည်သူများအတွက် သတိပြုရန်နှင့် ကြိုတင်ပြင်ဆင်ရန် အသေးစိတ် မြန်မာလို အကြံပြုချက်",
-        "colorCode": "red သို့မဟုတ် yellow သို့မဟုတ် green"
-      }
-    `;
-
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [{ role: "user", content: aiPrompt }],
-      model: "llama-3.3-70b-versatile", 
-      response_format: { type: "json_object" } 
-    });
-
-    const aiResult = JSON.parse(chatCompletion.choices[0].message.content);
+    // Run the local assessment calculation using OpenWeather data directly
+    const riskAssessment = assessFloodRisk(weatherData);
 
     res.json({
       township: townshipMapping[township.trim()] ? township.trim() : weatherData.name,
       weather: weatherData.weather[0].description,
       temp: weatherData.main.temp,
       humidity: weatherData.main.humidity,
-      riskLevel: aiResult.riskLevel,
-      recommendation: aiResult.recommendation,
-      colorCode: aiResult.colorCode
+      riskLevel: riskAssessment.riskLevel,
+      recommendation: riskAssessment.recommendation,
+      colorCode: riskAssessment.colorCode
     });
 
   } catch (error) {
-    console.error("Groq/Weather Error:", error);
-    res.status(500).json({ message: 'AI တွက်ချက်မှု အဆင်မပြေပါ။ ပြန်လည် စမ်းသပ်ပေးပါ။' });
+    console.error("Weather Error:", error);
+    res.status(500).json({ message: 'မိုးလေဝသ အချက်အလက် ရယူရန် အဆင်မပြေပါ။ ပြန်လည် စမ်းသပ်ပေးပါ။' });
   }
 });
 
