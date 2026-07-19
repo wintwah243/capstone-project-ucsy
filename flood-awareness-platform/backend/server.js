@@ -24,6 +24,9 @@ app.use('/api/risk', riskRoutes);
 const chatRoutes = require('./routes/chatRoutes');
 app.use('/api/chat', chatRoutes);
 
+const authRoutes = require('./routes/authRoutes');
+app.use('/api/auth', authRoutes);
+
 app.get('/', (req, res) => {
   res.send('Flood Awareness Platform Backend is working');
 });

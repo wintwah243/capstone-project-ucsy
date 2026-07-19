@@ -18,11 +18,25 @@ import {
   Users,
   Phone,
   Mail,
+  Navigation,
+  Layers,
+  ThermometerSun,
 } from 'lucide-react';
 
 const Homepage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeFeature, setActiveFeature] = useState(null);
+  const [selectedMapPoint, setSelectedMapPoint] = useState(null);
+  const [mapLayer, setMapLayer] = useState('flood');
+
+  // Mock data for map points
+  const floodRiskPoints = [
+    { id: 1, lat: 40, lng: 30, risk: 'high', city: 'မန္တလေး', level: 'အနီရောင်အဆင့်', people: '၁၂,၅၀၀', temp: '၃၂°C' },
+    { id: 2, lat: 55, lng: 45, risk: 'medium', city: 'စစ်ကိုင်း', level: 'လိမ္မော်ရောင်အဆင့်', people: '၈,၂၀၀', temp: '၃၀°C' },
+    { id: 3, lat: 35, lng: 55, risk: 'low', city: 'ပြင်ဦးလွင်', level: 'အဝါရောင်အဆင့်', people: '၃,၁၀၀', temp: '၂၈°C' },
+    { id: 4, lat: 60, lng: 35, risk: 'high', city: 'ရွှေဘို', level: 'အနီရောင်အဆင့်', people: '၁၅,၇၀၀', temp: '၃၃°C' },
+    { id: 5, lat: 45, lng: 60, risk: 'medium', city: 'မိတ္ထီလာ', level: 'လိမ္မော်ရောင်အဆင့်', people: '၆,၈၀၀', temp: '၂၉°C' },
+  ];
 
   const features = [
     {
@@ -71,58 +85,183 @@ const Homepage = () => {
     { step: '၄', title: 'အရေးပေါ်ဆက်သွယ်ရေး', desc: 'မိသားစုနှင့် သက်ဆိုင်ရာဌာနများသို့ အကြောင်းကြားပါ' }
   ];
 
+  const getRiskColor = (risk) => {
+    switch(risk) {
+      case 'high': return { bg: 'bg-red-500', pulse: 'bg-red-400', border: 'border-red-400' };
+      case 'medium': return { bg: 'bg-orange-500', pulse: 'bg-orange-400', border: 'border-orange-400' };
+      case 'low': return { bg: 'bg-yellow-500', pulse: 'bg-yellow-400', border: 'border-yellow-400' };
+      default: return { bg: 'bg-blue-500', pulse: 'bg-blue-400', border: 'border-blue-400' };
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
 
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-blue-700 to-blue-900 text-white py-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Hero Section with Map UI */}
+      <section className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white py-32 overflow-hidden">
+        {/* Animated background grid */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+            backgroundSize: '40px 40px'
+          }}></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
+            <div className="relative z-10">
               <div className="flex items-center mb-4">
-                <div className="bg-yellow-400 text-blue-900 px-4 py-1 rounded-full text-sm font-bold">
-                  ဘေးရောက်မှ ရှာဖွေတာထက်၊ ကြိုတင်ပြင်ဆင်ထားတာက အကောင်းဆုံး ခံတံတိုင်းပါ။
+                <div className="bg-yellow-400 text-slate-900 px-4 py-1 rounded-full text-sm font-bold animate-pulse">
+                  ⚡ ဘေးရောက်မှ ရှာဖွေတာထက်၊ ကြိုတင်ပြင်ဆင်ထားတာက အကောင်းဆုံး ခံတံတိုင်းပါ။
                 </div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
                 ရေဘေးအန္တရာယ်မှ ကြိုတင်ကာကွယ်ရေး
               </h1>
-              <p className="text-xl mb-8 text-blue-100">
+              <p className="text-xl mb-8 text-slate-300">
                 ရေကြီးမှုအန္တရာယ်မှ သင့်မိသားစုနှင့် ပိုင်ဆိုင်မှုများကို ကာကွယ်ရန် 
                 ကြိုတင်ပြင်ဆင်မှုများ၊ သတင်းအချက်အလက်များနှင့် AI အကူအညီများ
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link to="/risk-assessment" className="cursor-pointer">
-                <button className="bg-white text-blue-700 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition flex items-center">
+                <button className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:scale-105 flex items-center shadow-lg shadow-blue-500/25">
                   စတင်အသုံးပြုရန်
                   <ChevronRight className="ml-2 h-5 w-5" />
                 </button>
                 </Link>
-                <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-700 transition">
+                <button className="border-2 border-slate-500 text-slate-300 px-8 py-3 rounded-lg font-semibold hover:bg-slate-800 hover:text-white hover:border-slate-400 transition-all transform hover:scale-105">
                   ပိုမိုလေ့လာရန်
                 </button>
               </div>
             </div>
-            <div className="hidden md:block">
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/20 rounded-xl p-4 text-center">
-                    <CloudRain className="h-12 w-12 mx-auto mb-2" />
-                    <p className="text-sm">မိုးရွာသွန်းမှုအခြေအနေကိုဆန်းစစ်ပါ။</p>
+
+            {/* Modern Map UI */}
+            <div className="relative">
+              <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700 p-4 shadow-2xl">
+                {/* Map Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="h-5 w-5 text-cyan-400" />
+                    <span className="font-semibold text-sm">မြန်မာနိုင်ငံ ရေကြီးမှုအန္တရာယ်မြေပုံ</span>
                   </div>
-                  <div className="bg-white/20 rounded-xl p-4 text-center">
-                    <Wind className="h-12 w-12 mx-auto mb-2" />
-                    <p className="text-sm">လေတိုက်နှုန်းကိုသတိပြုပါ။</p>
+                  <div className="flex items-center space-x-2">
+                    <button className="p-1 hover:bg-slate-700 rounded-lg transition">
+                      <Layers className="h-4 w-4 text-slate-400" />
+                    </button>
+                    <button className="p-1 hover:bg-slate-700 rounded-lg transition">
+                      <Navigation className="h-4 w-4 text-slate-400" />
+                    </button>
                   </div>
-                  <div className="bg-white/20 rounded-xl p-4 text-center col-span-2">
-                    <MapPin className="h-12 w-12 mx-auto mb-2" />
-                    <p className="text-sm">သင်နေထိုင်ရာဒေသမှာရေကြီးနိုင်ခြေအန္တရာယ်ရှိမရှိစစ်ဆေးပါ။</p>
+                </div>
+
+                {/* Map Container */}
+                <div className="relative bg-slate-900 rounded-xl overflow-hidden mb-4" style={{ height: '300px' }}>
+                  {/* Map Background with grid pattern */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900">
+                    <div className="absolute inset-0 opacity-20" style={{
+                      backgroundImage: `radial-gradient(circle at 2px 2px, cyan 1px, transparent 0)`,
+                      backgroundSize: '30px 30px'
+                    }}></div>
+                    
+                    {/* Simulated river paths */}
+                    <svg className="absolute inset-0 w-full h-full">
+                      <path d="M 0 150 Q 100 100, 200 180 T 400 150" stroke="rgba(34, 211, 238, 0.3)" strokeWidth="8" fill="none" />
+                      <path d="M 0 200 Q 150 250, 300 200 T 400 250" stroke="rgba(34, 211, 238, 0.2)" strokeWidth="5" fill="none" />
+                      <path d="M 100 0 Q 150 150, 100 300" stroke="rgba(34, 211, 238, 0.15)" strokeWidth="4" fill="none" />
+                    </svg>
+
+                    {/* Flood risk zones */}
+                    <div className="absolute top-10 left-10 w-32 h-32 bg-red-500/20 rounded-full blur-xl animate-pulse"></div>
+                    <div className="absolute top-20 right-20 w-40 h-40 bg-orange-500/20 rounded-full blur-xl"></div>
+                    <div className="absolute bottom-10 left-20 w-36 h-36 bg-yellow-500/20 rounded-full blur-xl"></div>
+                  </div>
+
+                  {/* Risk Points */}
+                  {floodRiskPoints.map((point) => {
+                    const colors = getRiskColor(point.risk);
+                    return (
+                      <button
+                        key={point.id}
+                        onClick={() => setSelectedMapPoint(selectedMapPoint === point.id ? null : point.id)}
+                        className="absolute transform -translate-x-1/2 -translate-y-1/2 group"
+                        style={{ 
+                          left: `${point.lng}%`, 
+                          top: `${point.lat}%` 
+                        }}
+                      >
+                        <div className={`relative ${point.risk === 'high' ? 'animate-bounce' : ''}`}>
+                          <div className={`w-4 h-4 ${colors.bg} rounded-full border-2 border-white shadow-lg group-hover:scale-150 transition-transform duration-300`}></div>
+                          <div className={`absolute inset-0 ${colors.pulse} rounded-full animate-ping opacity-75`}></div>
+                        </div>
+                        
+                        {/* Tooltip */}
+                        {selectedMapPoint === point.id && (
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-slate-800 border border-slate-600 rounded-xl p-3 shadow-2xl z-20">
+                            <div className="text-sm font-semibold text-white mb-1">{point.city}</div>
+                            <div className="text-xs text-slate-400 space-y-1">
+                              <div className="flex items-center">
+                                <AlertTriangle className="h-3 w-3 mr-1 text-red-400" />
+                                {point.level}
+                              </div>
+                              <div className="flex items-center">
+                                <Users className="h-3 w-3 mr-1" />
+                                {point.people} ဦး
+                              </div>
+                              <div className="flex items-center">
+                                <ThermometerSun className="h-3 w-3 mr-1" />
+                                {point.temp}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Map Legend */}
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-red-500 rounded-full mr-1 animate-pulse"></div>
+                      <span className="text-slate-400">အနီရောင်အဆင့်</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-orange-500 rounded-full mr-1"></div>
+                      <span className="text-slate-400">လိမ္မော်ရောင်</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full mr-1"></div>
+                      <span className="text-slate-400">အဝါရောင်</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-slate-500">နောက်ဆုံးအပ်ဒိတ်: ၁၀ မိနစ်အကြာ</span>
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-3 gap-2 mt-4">
+                  <div className="bg-slate-800/50 rounded-lg p-2 text-center backdrop-blur-sm">
+                    <div className="text-cyan-400 font-bold text-lg">၂၄၇</div>
+                    <div className="text-xs text-slate-400">ထိခိုက်နိုင်သောနေရာများ</div>
+                  </div>
+                  <div className="bg-slate-800/50 rounded-lg p-2 text-center backdrop-blur-sm">
+                    <div className="text-orange-400 font-bold text-lg">၁၂</div>
+                    <div className="text-xs text-slate-400">အန္တရာယ်များသောမြို့နယ်</div>
+                  </div>
+                  <div className="bg-slate-800/50 rounded-lg p-2 text-center backdrop-blur-sm">
+                    <div className="text-green-400 font-bold text-lg">၈၉%</div>
+                    <div className="text-xs text-slate-400">ကြိုတင်သတိပေးချက်</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Bottom wave divider */}
         <div className="absolute bottom-0 left-0 right-0">
           <svg viewBox="0 0 1440 120" className="w-full">
             <path fill="white" d="M0,64L80,74.7C160,85,320,107,480,106.7C640,107,800,85,960,74.7C1120,64,1280,64,1360,64L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path>
@@ -130,6 +269,7 @@ const Homepage = () => {
         </div>
       </section>
 
+      {/* Rest of the sections remain exactly the same */}
       {/* Features Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -330,15 +470,6 @@ const Homepage = () => {
             <div>
               <h4 className="font-semibold mb-4">လူမှုကွန်ရက်</h4>
               <div className="flex space-x-4">
-                {/* <a href="#" className="bg-blue-800 p-2 rounded-full hover:bg-blue-700 transition">
-                  <Facebook className="h-5 w-5" />
-                </a> */}
-                {/* <a href="#" className="bg-blue-800 p-2 rounded-full hover:bg-blue-700 transition">
-                  <Twitter className="h-5 w-5" />
-                </a> */}
-                {/* <a href="#" className="bg-blue-800 p-2 rounded-full hover:bg-blue-700 transition">
-                  <Youtube className="h-5 w-5" />
-                </a> */}
               </div>
               <p className="text-blue-300 text-sm mt-4">
                 ရေဘေးကြိုတင်ကာကွယ်ရန်အတွက် ကျွန်ုပ်တို့ပလက်ဖောင်းကို အသုံးပြုပါ။

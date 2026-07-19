@@ -5,6 +5,8 @@ import ChecklistPage from './pages/ChecklistPage';
 import HomePage from './pages/Homepage';
 import RiskAssessment from './pages/RiskAssessment';
 import FloodAIAssistant from './pages/FloodAIAssistant';
+import Register from './pages/Register';
+import Login from './pages/Login'
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
         <Route path="/checklist" element={<ChecklistPage />} />
         <Route path="/risk-assessment" element={<RiskAssessment />} />
         <Route path="/ai-assistant" element={<FloodAIAssistant />} />
+        <Route path="/register" element={<Register />} />
+         <Route path="/login" element={<Login />} />
       </Routes>
     </Router>
   );
