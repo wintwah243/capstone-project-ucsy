@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
 import { fetchGuestChecklist } from '../api/checklistApi';
+import { Link } from 'react-router-dom';
 
 function ChecklistPage() {
   const [tasks, setTasks] = useState([]);
   const [checkedTasks, setCheckedTasks] = useState({});
   const [loading, setLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+
     fetchGuestChecklist()
       .then((data) => {
         setTasks(data);
@@ -32,15 +38,18 @@ function ChecklistPage() {
           <h1 className="text-3xl font-bold text-slate-800">ရေမကြီးခင် ကြိုတင်ပြင်ဆင်ထားရမည့် အခြေခံစာရင်းများ</h1>
         </header>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h3 className="font-bold text-blue-900 text-lg flex items-center gap-2">ကိုယ်ပိုင် Checklist ဖန်တီးချင်ပါသလား?</h3>
-            <p className="text-blue-700 text-sm mt-1">အကောင့်ဖွင့်ပြီး Login ဝင်ထားပါက မိမိစိတ်ကြိုက် Checklist Item များ ထပ်ထည့်နိုင်ပြီး ပြီးစီးမှုအခြေအနေကို အမြဲတမ်း သိမ်းဆည်းထားနိုင်မှာ ဖြစ်ပါတယ်။</p>
+        {/* this banner is only shown for people with no login or registration */}
+        {!isLoggedIn && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h3 className="font-bold text-blue-900 text-lg flex items-center gap-2">ကိုယ်ပိုင် Checklist ဖန်တီးချင်ပါသလား?</h3>
+              <p className="text-blue-700 text-sm mt-1">အကောင့်ဖွင့်ပြီး Login ဝင်ထားပါက မိမိစိတ်ကြိုက် Checklist Item များ ထပ်ထည့်နိုင်ပြီး ပြီးစီးမှုအခြေအနေကို အမြဲတမ်း သိမ်းဆည်းထားနိုင်မှာ ဖြစ်ပါတယ်။</p>
+            </div>
+            <Link to="/register" className="bg-blue-600 text-white font-semibold text-sm px-5 py-2.5 rounded-lg whitespace-nowrap hover:bg-blue-700 transition shadow-sm">
+              အကောင့်ဖွင့်ရန်
+            </Link>
           </div>
-          <button className="bg-blue-600 text-white font-semibold text-sm px-5 py-2.5 rounded-lg whitespace-nowrap hover:bg-blue-700 transition shadow-sm">
-            အကောင့်ဖွင့်ရန်
-          </button>
-        </div>
+        )}
 
         {/* Checklist View */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 divide-y divide-slate-100">
