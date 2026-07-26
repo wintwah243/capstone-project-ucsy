@@ -1,24 +1,28 @@
 import { useState, useEffect, useRef } from 'react';
 import { checkFloodRisk } from '../api/riskApi';
-import { townshipCoordinates } from '../data/townshipCoordinates'; 
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet'; 
-import 'leaflet/dist/leaflet.css'; 
+import { townshipCoordinates } from '../data/townshipCoordinates';
+import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap } from 'react-leaflet';
+import { savePin, fetchUserPins, deletePin } from '../api/pinApi';
+import { Bookmark, BookmarkCheck } from 'lucide-react';
+import 'leaflet/dist/leaflet.css';
+import { Link } from 'react-router-dom';
+import L from 'leaflet';
 
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
-  Droplets,
-  Wind,
-  Thermometer,
-  MapPin,
-  Shield,
-  Activity,
-  BarChart3,
-  ChevronDown,
-  Search
+import {
+    TrendingUp,
+    TrendingDown,
+    AlertTriangle,
+    CheckCircle,
+    Clock,
+    Droplets,
+    Wind,
+    Thermometer,
+    MapPin,
+    Shield,
+    Activity,
+    BarChart3,
+    ChevronDown,
+    Search
 } from 'lucide-react';
 
 function ChangeMapView({ coords }) {
@@ -26,7 +30,7 @@ function ChangeMapView({ coords }) {
     useEffect(() => {
         if (coords && coords.lat && coords.lng) {
             map.flyTo([coords.lat, coords.lng], 14, {
-                duration: 1.5, 
+                duration: 1.5,
                 easeLinearity: 0.25
             });
         }
@@ -39,7 +43,7 @@ function RiskAssessment() {
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    
+
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
     const [animatedValue, setAnimatedValue] = useState(0);
@@ -49,6 +53,10 @@ function RiskAssessment() {
 
     const [allTownshipsRisk, setAllTownshipsRisk] = useState({});
     const [isLoadingMapData, setIsLoadingMapData] = useState(true);
+
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [savedPins, setSavedPins] = useState([]);
+    const [isPinned, setIsPinned] = useState(false);
 
     const townshipOptions = [
         'ရန်ကုန်', 'မန္တလေး', 'နေပြည်တော်', 'ပဲခူး', 'မော်လမြိုင်', 'ပုသိမ်', 'တောင်ကြီး', 'မုံရွာ', 'စစ်တွေ',
@@ -69,13 +77,26 @@ function RiskAssessment() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Check login status and fetch user pins
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        setIsLoggedIn(!!token);
+
+        if (token) {
+            fetchUserPins()
+                .then(pins => {
+                    setSavedPins(pins);
+                })
+                .catch(err => console.error('Error fetching pins:', err));
+        }
+    }, []);
+
     // Fetch risk data for all townships on component mount
     useEffect(() => {
         const fetchAllTownshipsRisk = async () => {
             setIsLoadingMapData(true);
             const riskData = {};
-            
-            // Fetch risk data for each township
+
             for (const town of townshipOptions) {
                 try {
                     const data = await checkFloodRisk(town);
@@ -88,7 +109,6 @@ function RiskAssessment() {
                             temp: data.temp || '၂၈'
                         };
                     } else {
-                        // Default fallback if API returns no data
                         riskData[town] = {
                             riskLevel: 'ဘေးကင်း',
                             colorCode: 'green',
@@ -98,7 +118,6 @@ function RiskAssessment() {
                         };
                     }
                 } catch (error) {
-                    // If API fails, use default green
                     riskData[town] = {
                         riskLevel: 'ဘေးကင်း',
                         colorCode: 'green',
@@ -108,7 +127,7 @@ function RiskAssessment() {
                     };
                 }
             }
-            
+
             setAllTownshipsRisk(riskData);
             setIsLoadingMapData(false);
         };
@@ -132,6 +151,16 @@ function RiskAssessment() {
         }
     }, [result]);
 
+    // Check if current township is pinned
+    useEffect(() => {
+        if (result && savedPins.length > 0) {
+            const isAlreadyPinned = savedPins.some(pin => pin.township === result.township);
+            setIsPinned(isAlreadyPinned);
+        } else {
+            setIsPinned(false);
+        }
+    }, [result, savedPins]);
+
     const handleCheck = async (e) => {
         e.preventDefault();
         if (!township.trim()) return;
@@ -148,8 +177,7 @@ function RiskAssessment() {
                 setError(data.message);
             } else {
                 setResult(data);
-                
-                // Update the allTownshipsRisk with the new data
+
                 setAllTownshipsRisk(prev => ({
                     ...prev,
                     [data.township]: {
@@ -160,8 +188,7 @@ function RiskAssessment() {
                         temp: data.temp
                     }
                 }));
-                
-                // Update coordinates to fly to the searched township
+
                 if (townshipCoordinates && townshipCoordinates[data.township]) {
                     setCurrentCoords(townshipCoordinates[data.township]);
                 } else {
@@ -172,6 +199,42 @@ function RiskAssessment() {
             setError('စနစ်ချို့ယွင်းမှု ဖြစ်ပေါ်သွားပါသဖြင့် ခဏနေမှ ပြန်စမ်းကြည့်ပါ။');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSavePin = async () => {
+        if (!isLoggedIn) {
+            alert('ဤလုပ်ဆောင်ချက်အတွက် အကောင့်ဝင်ရန် လိုအပ်ပါသည်။');
+            return;
+        }
+
+        if (!result || !townshipCoordinates[result.township]) return;
+
+        try {
+            if (isPinned) {
+                const pinToDelete = savedPins.find(pin => pin.township === result.township);
+                if (pinToDelete) {
+                    await deletePin(pinToDelete._id);
+                    setSavedPins(prev => prev.filter(pin => pin._id !== pinToDelete._id));
+                    setIsPinned(false);
+                }
+            } else {
+                const coords = townshipCoordinates[result.township];
+                const pinData = {
+                    township: result.township,
+                    lat: coords.lat,
+                    lng: coords.lng,
+                    riskLevel: result.riskLevel,
+                    colorCode: result.colorCode,
+                    weather: result.weather,
+                    temp: result.temp
+                };
+                const savedPin = await savePin(pinData);
+                setSavedPins(prev => [...prev, savedPin]);
+                setIsPinned(true);
+            }
+        } catch (error) {
+            console.error('Error managing pin:', error);
         }
     };
 
@@ -193,7 +256,6 @@ function RiskAssessment() {
         return '#10B981';
     };
 
-    // Calculate statistics from real data
     const getStats = () => {
         const data = Object.values(allTownshipsRisk);
         const green = data.filter(d => d.colorCode === 'green').length;
@@ -204,7 +266,6 @@ function RiskAssessment() {
 
     const stats = getStats();
 
-    // Get risk level display text
     const getRiskDisplayText = (riskData, isCurrent) => {
         if (isCurrent && result) {
             return `အန္တရာယ်အဆင့်: ${result.riskLevel}`;
@@ -215,28 +276,25 @@ function RiskAssessment() {
         return 'အခြေအနေ: စစ်ဆေးနေဆဲ';
     };
 
-    // Get marker color based on risk data
     const getMarkerColor = (townName) => {
         const riskData = allTownshipsRisk[townName];
-        if (!riskData) return '#10B981'; // Default green if no data
-        
+        if (!riskData) return '#10B981';
+
         if (result && result.township === townName) {
             return getRiskColor(result.colorCode);
         }
-        
+
         return getRiskColor(riskData.colorCode);
     };
 
-    // Get marker size based on risk level
     const getMarkerRadius = (townName) => {
         if (result && result.township === townName) {
-            return 16; 
+            return 16;
         }
-        
+
         const riskData = allTownshipsRisk[townName];
         if (!riskData) return 10;
-        
-        // Make high risk markers slightly larger
+
         if (riskData.colorCode === 'red') return 14;
         if (riskData.colorCode === 'yellow') return 12;
         return 10;
@@ -264,7 +322,7 @@ function RiskAssessment() {
                     </div>
                 </div>
 
-                {/* Main Content  Map and Search Side by Side */}
+                {/* Main Content - Map and Search Side by Side */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                     {/* Map */}
                     <div className="lg:col-span-2 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
@@ -287,10 +345,16 @@ function RiskAssessment() {
                                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
                                         <span className="text-white/80 text-xs">မြင့်မား</span>
                                     </div>
+                                    {isLoggedIn && (
+                                        <div className="flex items-center space-x-1 ml-3 pl-3 border-l border-white/30">
+                                            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                            <span className="text-white/80 text-xs">သိမ်းထား</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="p-4">
                             <div className="h-[500px] w-full rounded-xl overflow-hidden border border-slate-200 z-10 relative">
                                 {isLoadingMapData ? (
@@ -306,10 +370,10 @@ function RiskAssessment() {
                                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                         />
-                                        
-                                        {/* fly-to animation */}
+
                                         <ChangeMapView coords={currentCoords} />
 
+                                        {/* Township markers */}
                                         {townshipCoordinates && Object.entries(townshipCoordinates).map(([name, info]) => {
                                             if (!info || !info.lat || !info.lng) return null;
 
@@ -322,7 +386,7 @@ function RiskAssessment() {
                                                 <CircleMarker
                                                     key={name}
                                                     center={[info.lat, info.lng]}
-                                                    radius={markerRadius} 
+                                                    radius={markerRadius}
                                                     fillColor={markerColor}
                                                     color={markerColor}
                                                     weight={isCurrent ? 3 : 2}
@@ -345,8 +409,7 @@ function RiskAssessment() {
                                                                     {riskData.recommendation}
                                                                 </p>
                                                             )}
-                                                            {/* Click to search this township */}
-                                                            <button 
+                                                            <button
                                                                 onClick={() => {
                                                                     setTownship(name);
                                                                     setIsOpen(false);
@@ -364,6 +427,74 @@ function RiskAssessment() {
                                                 </CircleMarker>
                                             );
                                         })}
+
+                                        {/* Display saved pins for logged-in users */}
+                                        {isLoggedIn && savedPins.map((pin) => {
+                                            const pinIcon = L.divIcon({
+                                                className: 'custom-pin-icon',
+                                                html: `
+            <div style="
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 32px;
+                height: 42px;
+                margin-top: -42px;
+                margin-left: -16px;
+            ">
+                <svg width="32" height="42" viewBox="0 0 32 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 0C7.164 0 0 7.164 0 16C0 28 16 42 16 42C16 42 32 28 32 16C32 7.164 24.836 0 16 0Z" fill="#FF0000" stroke="#FF0000" stroke-width="1.5"/>
+                    <circle cx="16" cy="16" r="8" fill="white" stroke="#FF0000" stroke-width="1"/>
+                </svg>
+                <div style="
+                    position: absolute;
+                    top: 9px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    font-size: 14px;
+                    color: #FF0000;
+                    font-weight: bold;
+                ">📌</div>
+            </div>
+        `,
+                                                iconSize: [32, 42],
+                                                iconAnchor: [16, 42],
+                                                popupAnchor: [0, -42]
+                                            });
+
+                                            return (
+                                                <Marker
+                                                    key={`saved-${pin._id}`}
+                                                    position={[pin.lat, pin.lng]}
+                                                    icon={pinIcon}
+                                                >
+                                                    <Popup>
+                                                        <div className="font-sans p-1 text-center">
+                                                            <h4 className="font-bold text-slate-800 text-sm">{pin.township} မြို့နယ်</h4>
+                                                            <p className="text-xs text-purple-600 font-medium mt-1">📌 သိမ်းဆည်းထားသော နေရာ</p>
+                                                            <p className="text-xs text-slate-500 mt-1">အန္တရာယ်အဆင့်: {pin.riskLevel}</p>
+                                                            <button
+                                                                onClick={async () => {
+                                                                    try {
+                                                                        await deletePin(pin._id);
+                                                                        setSavedPins(prev => prev.filter(p => p._id !== pin._id));
+                                                                        if (result && result.township === pin.township) {
+                                                                            setIsPinned(false);
+                                                                        }
+                                                                    } catch (error) {
+                                                                        console.error('Error deleting pin:', error);
+                                                                    }
+                                                                }}
+                                                                className="mt-2 text-xs bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition-colors"
+                                                            >
+                                                                ဖျက်ရန်
+                                                            </button>
+                                                        </div>
+                                                    </Popup>
+                                                </Marker>
+                                            );
+                                        })}
                                     </MapContainer>
                                 )}
                             </div>
@@ -378,7 +509,7 @@ function RiskAssessment() {
                                 <Search className="h-5 w-5 text-blue-600 mr-2" />
                                 <h3 className="font-bold text-slate-800">မြို့နယ်ရှာဖွေရန်</h3>
                             </div>
-                            
+
                             <form onSubmit={handleCheck} className="space-y-4">
                                 <div className="relative" ref={dropdownRef}>
                                     <div className="relative group">
@@ -414,15 +545,15 @@ function RiskAssessment() {
                                     )}
                                 </div>
 
-                                <button 
-                                    type="submit" 
-                                    disabled={loading} 
+                                <button
+                                    type="submit"
+                                    disabled={loading}
                                     className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-2.5 rounded-xl transition-all duration-300 shadow-lg shadow-blue-500/30 transform hover:scale-[1.02] text-sm"
                                 >
                                     {loading ? 'တွက်ချက်နေသည်...' : 'စစ်ဆေးမည်'}
                                 </button>
                             </form>
-                            
+
                             {error && (
                                 <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start">
                                     <AlertTriangle className="h-4 w-4 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
@@ -431,7 +562,7 @@ function RiskAssessment() {
                             )}
                         </div>
 
-                        {/* Quick Stats  */}
+                        {/* Quick Stats */}
                         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6">
                             <h3 className="font-bold text-slate-800 mb-3">အခြေအနေအကျဉ်းချုပ်</h3>
                             <div className="space-y-2">
@@ -542,7 +673,7 @@ function RiskAssessment() {
                                         </h3>
                                         <span className="font-bold text-2xl text-slate-800">{animatedValue}%</span>
                                     </div>
-                                    
+
                                     <div className="bg-white rounded-xl p-4 border border-slate-200">
                                         <div className="relative h-32">
                                             <div className="relative h-full flex items-end justify-around">
@@ -573,21 +704,37 @@ function RiskAssessment() {
                                         <h3 className="font-bold text-slate-800 mb-2 flex items-center"><Shield className="h-4 w-4 mr-2 text-blue-500" /> အကြံပြုချက်</h3>
                                         <p className="text-slate-700 leading-relaxed">{result.recommendation}</p>
                                     </div>
-                                </div>
 
-                                {/* Fly to Map Button */}
-                                <div className="mt-6">
-                                    <button 
-                                        onClick={() => {
-                                            if (result && townshipCoordinates[result.township]) {
-                                                setCurrentCoords(townshipCoordinates[result.township]);
-                                            }
-                                        }}
-                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg shadow-blue-500/30 hover:shadow-xl"
-                                    >
-                                        <MapPin className="h-4 w-4" />
-                                        <span>မြေပုံပေါ်သို့ ပြန်သွားရန်</span>
-                                    </button>
+                                    {/* Save Pin Button */}
+                                    <div className="mt-4">
+                                        {isLoggedIn ? (
+                                            <button
+                                                onClick={handleSavePin}
+                                                className={`w-full font-medium px-4 py-2.5 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg ${isPinned
+                                                        ? 'bg-green-500 hover:bg-green-600 text-white shadow-green-500/30'
+                                                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30'
+                                                    }`}
+                                            >
+                                                {isPinned ? (
+                                                    <>
+                                                        <BookmarkCheck className="h-4 w-4" />
+                                                        <span>သိမ်းဆည်းပြီး</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Bookmark className="h-4 w-4" />
+                                                        <span>မြေပုံပေါ်တွင် သိမ်းဆည်းမည်</span>
+                                                    </>
+                                                )}
+                                            </button>
+                                        ) : (
+                                            <div className="bg-slate-100 rounded-xl p-4 border border-slate-200">
+                                                <p className="text-sm text-slate-600 text-center">
+                                                    <Link to="/login" className="text-blue-600 font-medium hover:underline">အကောင့်ဝင်ပါ</Link> သို့မဟုတ် <Link to="/register" className="text-blue-600 font-medium hover:underline">အကောင့်ဖွင့်ပါ</Link>က မြေပုံပေါ်တွင် သိမ်းဆည်းနိုင်ပါသည်
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
