@@ -30,7 +30,8 @@ import {
   Grid,
   List,
   TrendingUp,
-  Info
+  Info,
+  X
 } from 'lucide-react';
 
 function KnowledgeHub() {
@@ -40,6 +41,7 @@ function KnowledgeHub() {
   const [viewMode, setViewMode] = useState('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [selectedArticle, setSelectedArticle] = useState(null);
   const [error, setError] = useState(null);
 
   const mockVideos = [
@@ -47,7 +49,8 @@ function KnowledgeHub() {
       id: 1,
       title: 'ရေကြီးမှုအန္တရာယ် ကြိုတင်ကာကွယ်နည်းများ',
       duration: '၁၂:၃၄',
-      thumbnail: '/api/placeholder/400/225',
+      thumbnail: 'https://img.youtube.com/vi/j4yuzWuMLGQ/maxresdefault.jpg',
+      videoId: 'j4yuzWuMLGQ',
       views: '၁၂,၅၀၀',
       date: '၂၀၂၆ ဇွန်လ ၂၅ ရက်',
       category: 'ကြိုတင်ပြင်ဆင်မှု',
@@ -57,7 +60,8 @@ function KnowledgeHub() {
       id: 2,
       title: 'အရေးပေါ်ပစ္စည်းများ ထုပ်ပိုးနည်း',
       duration: '၈:၂၁',
-      thumbnail: '/api/placeholder/400/225',
+      thumbnail: 'https://img.youtube.com/vi/iRjQsPNZuUk/maxresdefault.jpg',
+      videoId: 'iRjQsPNZuUk',
       views: '၈,၉၀၀',
       date: '၂၀၂၆ ဇွန်လ ၂၀ ရက်',
       category: 'လက်တွေ့သင်ခန်းစာ',
@@ -67,7 +71,8 @@ function KnowledgeHub() {
       id: 3,
       title: 'ရေဘေးလွတ်ရာ ရွှေ့ပြောင်းခြင်းလမ်းညွှန်',
       duration: '၁၅:၄၅',
-      thumbnail: '/api/placeholder/400/225',
+      thumbnail: 'https://img.youtube.com/vi/4KPShVG0270/maxresdefault.jpg',
+      videoId: '4KPShVG0270',
       views: '၁၅,၂၀၀',
       date: '၂၀၂၆ ဇွန်လ ၁၈ ရက်',
       category: 'ဘေးလွတ်ရာရွှေ့ပြောင်းခြင်း',
@@ -147,71 +152,32 @@ function KnowledgeHub() {
     }
   ];
 
-  const mockGuides = [
-    {
-      id: 1,
-      title: 'ရေဘေးကြိုတင်ပြင်ဆင်ရေးလမ်းညွှန်',
-      type: 'pdf',
-      size: '2.4 MB',
-      downloads: '၁၅,၂၀၀',
-      category: 'ကြိုတင်ပြင်ဆင်မှု',
-      icon: FileText
-    },
-    {
-      id: 2,
-      title: 'အရေးပေါ်ပစ္စည်းများစာရင်း',
-      type: 'pdf',
-      size: '1.1 MB',
-      downloads: '၁၂,၈၀၀',
-      category: 'စစ်ဆေးရန်စာရင်း',
-      icon: FileText
-    },
-    {
-      id: 3,
-      title: 'ရေဘေးလွတ်ရာရွှေ့ပြောင်းမှုအစီအစဉ်',
-      type: 'pdf',
-      size: '3.2 MB',
-      downloads: '၉,၅၀၀',
-      category: 'ဘေးလွတ်ရာရွှေ့ပြောင်းခြင်း',
-      icon: FileText
-    },
-    {
-      id: 4,
-      title: 'ရေဘေးလွန်ကာလ ကျန်းမာရေးလမ်းညွှန်',
-      type: 'pdf',
-      size: '1.8 MB',
-      downloads: '၇,၃၀၀',
-      category: 'ကျန်းမာရေး',
-      icon: FileText
-    }
-  ];
-
   const mockPhotos = [
     {
       id: 1,
       title: 'ရေကြီးမှုကာကွယ်ရေး ဆောင်ရွက်ချက်များ',
-      image: '/api/placeholder/400/300',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKNybSYiN9yBbSL5MRXu19a53NlK9M-cj-EXtcVfy1ikUJT4_12HkbnKk&s=10',
       date: '၂၀၂၆ ဇူလိုင် ၁၀ ရက်',
       category: 'ကာကွယ်ရေး'
     },
     {
       id: 2,
       title: 'စေတနာ့ဝန်ထမ်းများ၏ ကယ်ဆယ်ရေးလုပ်ငန်းများ',
-      image: '/api/placeholder/400/300',
+      image: 'https://ichef.bbci.co.uk/news/480/cpsprodpb/83f7/live/b7230900-7371-11ef-86be-e5834e76a109.jpg.webp',
       date: '၂၀၂၆ ဇူလိုင် ၉ ရက်',
       category: 'ကယ်ဆယ်ရေး'
     },
     {
       id: 3,
       title: 'ရေဘေးကြိုတင်ပြင်ဆင်မှု သင်တန်း',
-      image: '/api/placeholder/400/300',
+      image: 'https://www.kamaxgroup.com/wp-content/uploads/2024/09/Devastating-Floods-in-Myanmar-Affect-Over-880000-KAMAX-Donates-to-Relief-Efforts-6-1024x768.webp',
       date: '၂၀၂၆ ဇူလိုင် ၈ ရက်',
       category: 'သင်တန်း'
     },
     {
       id: 4,
       title: 'အရေးပေါ်ပစ္စည်းများ ဖြန့်ဝေခြင်း',
-      image: '/api/placeholder/400/300',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7esk9N8ucF9DpRv16WGiDj82ZslNfmrKEStzTiwmKdmyH54A2-4zLMByy&s=10',
       date: '၂၀၂၆ ဇူလိုင် ၇ ရက်',
       category: 'အကူအညီ'
     }
@@ -237,6 +203,18 @@ function KnowledgeHub() {
     };
 
     fetchArticlesFromBackend();
+  }, []);
+
+  // Close modals on ESC key
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        setSelectedVideo(null);
+        setSelectedArticle(null);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
   }, []);
 
   if (loading) {
@@ -382,11 +360,14 @@ function KnowledgeHub() {
                   <h2 className="text-xl font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition">
                     {article.title}
                   </h2>
-                  <p className="text-slate-600 text-sm line-clamp-3 mb-4">
+                  <p className="text-slate-600 text-sm line-clamp-3 mb-4 whitespace-pre-line">
                     {article.content}
                   </p>
                   <div className="flex items-center justify-between">
-                    <button className="text-blue-600 font-medium text-sm hover:underline flex items-center">
+                    <button 
+                      onClick={() => setSelectedArticle(article)}
+                      className="text-blue-600 font-medium text-sm hover:underline flex items-center"
+                    >
                       ဆက်လက်ဖတ်ရှုရန် <ChevronRight className="h-4 w-4 ml-1" />
                     </button>
                     <button className="p-2 hover:bg-slate-100 rounded-lg transition">
@@ -412,19 +393,20 @@ function KnowledgeHub() {
                 <Video className="h-6 w-6 mr-2 text-blue-600" />
                 ဗီဒီယိုသင်ခန်းစာများ
               </h2>
-              <button className="text-blue-600 font-medium hover:text-blue-800 flex items-center">
-                အားလုံးကြည့်ရန် <ArrowUpRight className="h-4 w-4 ml-1" />
-              </button>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {mockVideos.map((video) => (
-                <div key={video.id} className="group bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl transition-all duration-300">
+                <div 
+                  key={video.id} 
+                  className="group bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer"
+                  onClick={() => setSelectedVideo(video)}
+                >
                   <div className="relative">
                     <img src={video.thumbnail} alt={video.title} className="w-full h-48 object-cover" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button className="bg-white rounded-full p-4 transform scale-90 group-hover:scale-100 transition">
-                        <Play className="h-8 w-8 text-blue-600" />
-                      </button>
+                      <div className="bg-white rounded-full p-4 transform scale-90 group-hover:scale-100 transition">
+                        <Play className="h-8 w-8 text-blue-600 ml-1" />
+                      </div>
                     </div>
                     <div className="absolute bottom-2 right-2 bg-black/70 text-white text-sm px-2 py-1 rounded">
                       {video.duration}
@@ -460,9 +442,6 @@ function KnowledgeHub() {
                 <Newspaper className="h-6 w-6 mr-2 text-red-600" />
                 နောက်ဆုံးရသတင်းများ
               </h2>
-              <button className="text-blue-600 font-medium hover:text-blue-800 flex items-center">
-                သတင်းအားလုံး <ArrowUpRight className="h-4 w-4 ml-1" />
-              </button>
             </div>
             <div className="space-y-4">
               {mockNews.map((news) => (
@@ -502,51 +481,6 @@ function KnowledgeHub() {
                   </div>
                 </div>
               ))}
-            </div>
-          </section>
-        )}
-
-        {(activeTab === 'all' || activeTab === 'guides') && (
-          <section className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-slate-800 flex items-center">
-                <BookOpen className="h-6 w-6 mr-2 text-green-600" />
-                လမ်းညွှန်ချက်များနှင့် စာရွက်စာတမ်းများ
-              </h2>
-            </div>
-            <div className="grid md:grid-cols-2 gap-6">
-              {mockGuides.map((guide) => {
-                const Icon = guide.icon;
-                return (
-                  <div key={guide.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-lg transition group">
-                    <div className="flex items-start space-x-4">
-                      <div className="bg-green-100 rounded-xl p-3 group-hover:bg-green-200 transition">
-                        <Icon className="h-8 w-8 text-green-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                            {guide.category}
-                          </span>
-                          <span className="text-slate-400 text-sm">{guide.type.toUpperCase()}</span>
-                        </div>
-                        <h3 className="font-semibold text-slate-800 mb-2">{guide.title}</h3>
-                        <div className="flex items-center space-x-4 text-sm text-slate-500 mb-3">
-                          <span>{guide.size}</span>
-                          <span className="flex items-center">
-                            <Download className="h-4 w-4 mr-1" />
-                            {guide.downloads} ကြိမ်
-                          </span>
-                        </div>
-                        <button className="inline-flex items-center text-blue-600 font-medium hover:text-blue-800">
-                          <Download className="h-4 w-4 mr-1" />
-                          ဒေါင်းလုဒ်လုပ်ရန်
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </section>
         )}
@@ -608,9 +542,6 @@ function KnowledgeHub() {
                       <span className="text-lg font-bold text-blue-600">{contact.phone}</span>
                       <span className="text-xs text-slate-500">{contact.available}</span>
                     </div>
-                    <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition">
-                      ခေါ်ဆိုရန်
-                    </button>
                   </div>
                 );
               })}
@@ -618,6 +549,114 @@ function KnowledgeHub() {
           </section>
         )}
       </main>
+
+      {/* Article Modal */}
+      {selectedArticle && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setSelectedArticle(null)}
+        >
+          <div 
+            className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-white rounded-t-2xl z-10 p-4 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                  {selectedArticle.category}
+                </span>
+                {selectedArticle.source && (
+                  <span className="text-xs text-slate-500 flex items-center">
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    {selectedArticle.source}
+                  </span>
+                )}
+              </div>
+              <button 
+                onClick={() => setSelectedArticle(null)}
+                className="p-2 hover:bg-slate-100 rounded-lg transition"
+              >
+                <X className="h-6 w-6 text-slate-600" />
+              </button>
+            </div>
+            <div className="p-6">
+              <h2 className="text-2xl font-bold text-slate-800 mb-4">
+                {selectedArticle.title}
+              </h2>
+              <div className="prose prose-slate max-w-none">
+                <p className="text-slate-700 whitespace-pre-line leading-relaxed">
+                  {selectedArticle.content}
+                </p>
+              </div>
+              {selectedArticle.createdAt && (
+                <div className="mt-6 pt-4 border-t border-slate-200">
+                  <span className="text-sm text-slate-500 flex items-center">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    {new Date(selectedArticle.createdAt).toLocaleDateString('my-MM', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Modal */}
+      {selectedVideo && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setSelectedVideo(null)}
+        >
+          <div 
+            className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-white rounded-t-2xl z-10 p-4 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="font-bold text-slate-800 text-lg">{selectedVideo.title}</h3>
+              <button 
+                onClick={() => setSelectedVideo(null)}
+                className="p-2 hover:bg-slate-100 rounded-lg transition"
+              >
+                <X className="h-6 w-6 text-slate-600" />
+              </button>
+            </div>
+            <div className="p-4">
+              <div className="relative pb-[56.25%] h-0 rounded-xl overflow-hidden bg-black">
+                <iframe
+                  className="absolute top-0 left-0 w-full h-full"
+                  src={`https://www.youtube.com/embed/${selectedVideo.videoId}?autoplay=1&rel=0`}
+                  title={selectedVideo.title}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+              <div className="mt-4 space-y-2">
+                <p className="text-slate-600">{selectedVideo.description}</p>
+                <div className="flex items-center space-x-4 text-sm text-slate-500">
+                  <span className="flex items-center">
+                    <Eye className="h-4 w-4 mr-1" />
+                    {selectedVideo.views}
+                  </span>
+                  <span className="flex items-center">
+                    <Clock className="h-4 w-4 mr-1" />
+                    {selectedVideo.date}
+                  </span>
+                  <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                    {selectedVideo.category}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
